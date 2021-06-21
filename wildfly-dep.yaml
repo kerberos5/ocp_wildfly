@@ -1,0 +1,56 @@
+﻿apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wildfly-pvc
+  labels:
+    app: wildfly
+    namespace: ubuntu-test
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  selector:
+    matchLabels:
+      storage-tier: pv1-wildfly
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wildfly
+  labels:
+    app: wildfly
+    namespace: ubuntu-test
+spec:
+  selector:
+    matchLabels:
+      app: wildfly
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: wildfly
+        tier: backend
+    spec:
+      containers:
+      - name: wildfly
+        image: giuliadi78/wildfly:1.1
+        ports:
+        - name: port8080
+          containerPort: 8080
+        - name: port9990
+          containerPort: 9990
+        resources:
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 200m      
+        volumeMounts:
+        - name: wildfly-persistent-storage
+          mountPath: /opt/jboss/wildfly/standalone/deployments
+      volumes:
+      - name: wildfly-persistent-storage
+        persistentVolumeClaim:
+          claimName: wildfly-pvc

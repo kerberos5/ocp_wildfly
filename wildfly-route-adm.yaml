@@ -1,0 +1,20 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: wildfly-adm
+  namespace: ubuntu-test
+spec:
+  host: wildfly-admin.ubuntu.local
+  port:
+    targetPort: admin
+  to:
+    kind: Service
+    name: wildfly-svc
+    weight: 100
+  wildcardPolicy: None
+status:
+  ingress:
+    - conditions:
+      host: wildfly-admin.ubuntu.local
+      routerName: router
+      wildcardPolicy: None
